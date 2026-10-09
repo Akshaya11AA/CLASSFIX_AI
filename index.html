@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#315fe9">
+  <title>ClassFix AI | Smart Classroom Issue Reporter</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a href="#" class="brand" id="home-link">
+      <span class="brand-icon">C</span>
+      <span>ClassFix <b>AI</b><small>SMART CAMPUS SUPPORT</small></span>
+    </a>
+    <div class="header-actions">
+      <span id="connection-status" class="connection">Checking connection...</span>
+      <button id="logout-btn" class="btn btn-light hidden">Sign out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="welcome-view" class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">SMART CLASSROOM ISSUE REPORTER</span>
+        <h1>A better campus<br><span>starts with a report.</span></h1>
+        <p>Report classroom problems in seconds. Help your campus team resolve issues faster and keep learning spaces ready.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="student-start-btn">Student / Staff Portal →</button>
+          <button class="btn btn-light" id="admin-start-btn">Admin Portal</button>
+        </div>
+        <div class="trust-note">● Simple reporting &nbsp; ● Issue tracking &nbsp; ● Maintenance insights</div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="floating-card card-a">📽️<small>Projector</small></div>
+        <div class="floating-card card-b">💡<small>Lighting</small></div>
+        <div class="floating-card card-c">📶<small>Wi-Fi</small></div>
+        <div class="checkmark">✓</div>
+      </div>
+    </section>
+
+    <section id="auth-view" class="auth-layout hidden">
+      <div class="auth-intro">
+        <span class="eyebrow">SECURE ACCESS</span>
+        <h1 id="auth-heading">Student & staff portal</h1>
+        <p id="auth-description">Sign in to report a classroom issue and track your own submissions.</p>
+        <ul>
+          <li>✓ Report classroom issues</li>
+          <li>✓ Attach supporting photos</li>
+          <li>✓ Track report status</li>
+        </ul>
+        <button class="text-button" id="back-home-btn">← Back to home</button>
+      </div>
+
+      <div class="panel auth-card">
+        <div class="tabs" id="auth-tabs">
+          <button class="tab active" data-mode="signin">Sign in</button>
+          <button class="tab" data-mode="signup">Create account</button>
+        </div>
+
+        <form id="auth-form">
+          <label>Email address
+            <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </label>
+          <label>Password
+            <input id="auth-password" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" required>
+          </label>
+          <button id="auth-submit" class="btn btn-primary full" type="submit">Sign in →</button>
+        </form>
+
+        <div class="separator"><span>OR</span></div>
+        <button id="google-btn" class="btn btn-google full" type="button">
+          <span class="google-mark">G</span> Continue with Google
+        </button>
+        <p class="small muted">Use your own student or staff account. Admin access is restricted separately.</p>
+        <p id="auth-message" class="message" role="status"></p>
+      </div>
+    </section>
+
+    <section id="admin-login-view" class="auth-layout hidden">
+      <div class="auth-intro">
+        <span class="eyebrow">RESTRICTED AREA</span>
+        <h1>Admin portal</h1>
+        <p>Authorized administrator access only. The admin dashboard is protected by database access policies.</p>
+        <ul>
+          <li>✓ View active issues</li>
+          <li>✓ Update repair status</li>
+          <li>✓ Generate completed-issue reports</li>
+        </ul>
+        <button class="text-button" id="admin-back-btn">← Back to home</button>
+      </div>
+      <div class="panel auth-card">
+        <div class="admin-symbol">▦</div>
+        <span class="eyebrow">ADMINISTRATOR SIGN IN</span>
+        <h2>Welcome back</h2>
+        <p class="muted small">Only the authorized admin email can enter this portal.</p>
+        <form id="admin-form">
+          <label>Admin email
+            <input id="admin-email" type="email" autocomplete="username" value="admin123@gmail.com" required>
+          </label>
+          <label>Password
+            <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter admin password" required>
+          </label>
+          <button id="admin-submit" class="btn btn-primary full" type="submit">Sign in to dashboard →</button>
+        </form>
+        <p id="admin-message" class="message" role="status"></p>
+        <p class="small muted">Create the admin account in Supabase Authentication before signing in.</p>
+      </div>
+    </section>
+
+    <section id="student-view" class="hidden">
+      <div class="page-heading">
+        <div><span class="eyebrow">STUDENT & STAFF</span><h1>Report an issue</h1>
+          <p>Signed in as <strong id="student-email"></strong></p>
+        </div>
+        <span class="tag tag-green">Private reporting</span>
+      </div>
+
+      <div class="two-column">
+        <div class="panel form-panel">
+          <h2>Tell us what needs attention</h2>
+          <p class="muted small">Please provide the location and a clear description of the issue.</p>
+          <form id="issue-form">
+            <div class="field-grid">
+              <label>Building / Block
+                <input id="building" maxlength="100" placeholder="e.g. Main Block" required>
+              </label>
+              <label>Room number
+                <input id="room" maxlength="50" placeholder="e.g. A-204" required>
+              </label>
+            </div>
+            <label>Issue title
+              <input id="title" maxlength="120" placeholder="e.g. Projector is not working" required>
+            </label>
+            <div class="field-grid">
+              <label>Category
+                <select id="category" required>
+                  <option value="">Select category</option>
+                  <option>Projector / Display</option>
+                  <option>Fan / Ventilation</option>
+                  <option>Lighting / Electrical</option>
+                  <option>Wi-Fi / Network</option>
+                  <option>Furniture</option>
+                  <option>Cleanliness</option>
+                  <option>Safety</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>Urgency
+                <select id="urgency" required>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical / Safety risk</option>
+                </select>
+              </label>
+            </div>
+            <label>Description
+              <textarea id="description" rows="4" maxlength="2000" placeholder="Describe what happened and when you noticed it..." required></textarea>
+            </label>
+
+            <div class="upload-box">
+              <div class="upload-icon">↑</div>
+              <div class="upload-copy">
+                <strong>Attach a photo (optional)</strong>
+                <span>Upload an image from your device to help identify the issue.</span>
+                <small id="file-name">JPG, PNG or WEBP · max 5 MB</small>
+                <img id="photo-preview" class="photo-preview hidden" alt="Selected issue photo preview">
+              </div>
+              <label class="upload-button" for="photo">Choose file</label>
+              <input id="photo" type="file" accept="image/png,image/jpeg,image/webp">
+            </div>
+
+            <label class="checkbox-label">
+              <input id="confirm-accuracy" type="checkbox" required>
+              <span>I confirm that the information provided is accurate.</span>
+            </label>
+            <button id="issue-submit" class="btn btn-primary full" type="submit">Submit issue report →</button>
+            <p id="issue-message" class="message" role="status"></p>
+          </form>
+        </div>
+
+        <aside class="panel side-panel">
+          <h2>My reports</h2>
+          <p class="muted small">Only reports submitted by your account are shown here.</p>
+          <button id="refresh-my-reports" class="btn btn-light full" type="button">Refresh my reports</button>
+          <div id="my-reports" class="report-list">
+            <div class="empty-state">Sign in to view your reports.</div>
+          </div>
+          <div class="privacy-note"><strong>🔒 Your privacy matters</strong><p>Other students cannot view your reports. The admin team can access reports for maintenance.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="admin-view" class="hidden">
+      <div class="page-heading admin-heading">
+        <div><span class="eyebrow">MAINTENANCE CONTROL CENTRE</span><h1>Admin dashboard</h1>
+          <p>Signed in as <strong id="signed-admin-email">admin123@gmail.com</strong></p>
+        </div>
+        <div class="button-row">
+          <button id="refresh-admin" class="btn btn-light">↻ Refresh</button>
+          <button id="export-all" class="btn btn-light">Export all CSV</button>
+          <button id="export-completed" class="btn btn-primary">Export completed CSV ↓</button>
+        </div>
+      </div>
+
+      <div id="admin-message-dashboard" class="message" role="status"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><span>Total reports</span><strong id="stat-total">0</strong><small>All submitted issues</small></div>
+        <div class="stat-card stat-orange"><span>Active issues</span><strong id="stat-active">0</strong><small>Need attention</small></div>
+        <div class="stat-card stat-red"><span>High / critical</span><strong id="stat-urgent">0</strong><small>Priority complaints</small></div>
+        <div class="stat-card stat-green"><span>Completed</span><strong id="stat-completed">0</strong><small>Resolved issues</small></div>
+      </div>
+
+      <div class="panel issues-panel">
+        <div class="issues-heading">
+          <div><h2>Issue register</h2><p class="muted small">Review, assign, and update reported classroom issues.</p></div>
+          <div class="filters">
+            <input id="search-issues" type="search" placeholder="Search title, room, ID...">
+            <select id="filter-status">
+              <option value="All">All statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <select id="filter-priority">
+              <option value="All">All priorities</option>
+              <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Issue</th><th>Location</th><th>Category</th><th>Priority</th><th>Reported by</th><th>Status</th><th>Update</th>
+            </tr></thead>
+            <tbody id="issues-table-body">
+              <tr><td colspan="7" class="empty-state">Loading reports...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span id="issue-count">0 issues</span><span>Live data from Supabase</span></div>
+      </div>
+
+      <div class="panel report-summary">
+        <div><span class="eyebrow">RESOLUTION REPORTS</span><h2>Completed issue summary</h2>
+          <p class="muted small">Generate a CSV report from completed maintenance issues and open it in Excel.</p>
+        </div>
+        <div class="summary-numbers"><span>Completed issues</span><strong id="completed-summary-count">0</strong></div>
+        <button id="export-summary" class="btn btn-primary">Download completed report ↓</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 ClassFix AI · Smart Campus Support</span>
+    <span>PS 21 · Smart Classroom Issue Reporter</span>
+  </footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
